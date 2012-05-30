@@ -14,8 +14,9 @@ if nargin>=1
 	end
 end
 
-% set constants
-TAB_SPACE_LENGTH = 4; % number of spaces per tab
+%% set constants
+% number of spaces per tab
+TAB_SPACE_LENGTH = com.mathworks.services.Prefs.getIntegerPref('CommandWindowSpacesPerTab');
 str_margin = '\t';
 
 % filter out doubles
