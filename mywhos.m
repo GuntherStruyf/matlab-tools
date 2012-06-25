@@ -17,6 +17,10 @@ end
 %% set constants
 % number of spaces per tab
 TAB_SPACE_LENGTH = com.mathworks.services.Prefs.getIntegerPref('CommandWindowSpacesPerTab');
+if TAB_SPACE_LENGTH==0
+	TAB_SPACE_LENGTH=4; % set to default 
+end
+
 str_margin = '\t';
 
 % filter out doubles
