@@ -16,9 +16,13 @@ end
 
 %% set constants
 % number of spaces per tab
-TAB_SPACE_LENGTH = com.mathworks.services.Prefs.getIntegerPref('CommandWindowSpacesPerTab');
-if TAB_SPACE_LENGTH==0
-	TAB_SPACE_LENGTH=4; % set to default 
+if isCommandWindowOpen
+	TAB_SPACE_LENGTH = com.mathworks.services.Prefs.getIntegerPref('CommandWindowSpacesPerTab');
+	if TAB_SPACE_LENGTH==0
+		TAB_SPACE_LENGTH=4; % set to default 
+	end
+else
+	TAB_SPACE_LENGTH=8; % non commandwindow default
 end
 
 str_margin = '\t';
@@ -158,5 +162,17 @@ end
 function retval = isEqualVar(v1,v2)
 	retval = (strcmp(v1.name,v2.name) && v1.bytes==v2.bytes && ...
 		all(v1.size==v2.size) && strcmp(v1.class,v2.class));
+end
+
+function retval = isCommandWindowOpen()
+	% there are a few ways of doing this, not exactly sure which is correct	
+
+	% retval = desktop('-inuse');
+
+	jDesktop = com.mathworks.mde.desk.MLDesktop.getInstance;
+	retval = ~isempty(jDesktop.getClient('Command Window'));
+
+	% clientTitles = jDesktop.getClientShortTitles
+	% compare if any contains command window
 end
 
