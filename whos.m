@@ -4,7 +4,10 @@ function mywhos( SORT_ASC_BYTES )
 %	var_whos	output of normal whos function
 
 % get caller workspace
-var_whos = evalin('caller','[whos ; whos(''global'')]');
+%var_whos = evalin('caller','[whos ; whos(''global'')]');
+orig_whos=@(option) ['builtin(''whos'',''' option ''')'];
+var_whos = evalin('caller',[ '[' orig_whos('') ';' orig_whos('global') ']']);
+
 
 % EXECUTE PREFERENCES
 if nargin>=1
