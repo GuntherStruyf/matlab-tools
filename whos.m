@@ -1,12 +1,17 @@
-function mywhos( SORT_ASC_BYTES )
+function S = whos( SORT_ASC_BYTES )
 %MYWHOS give information about matlab memory usage and workspace variables
 % INPUT
 %	var_whos	output of normal whos function
+
 
 % get caller workspace
 %var_whos = evalin('caller','[whos ; whos(''global'')]');
 orig_whos=@(option) ['builtin(''whos'',''' option ''')'];
 var_whos = evalin('caller',[ '[' orig_whos('') ';' orig_whos('global') ']']);
+
+if nargout==1
+	S = evalin('caller', orig_whos(''));
+end
 
 
 % EXECUTE PREFERENCES
