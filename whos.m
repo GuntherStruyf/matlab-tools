@@ -6,7 +6,6 @@ function S = whos( SORT_ASC_BYTES )
 
 % get caller workspace
 %var_whos = evalin('caller','[whos ; whos(''global'')]');
-orig_whos=@(option) ['builtin(''whos'',''' option ''')'];
 var_whos = evalin('caller',[ '[' orig_whos('') ';' orig_whos('global') ']']);
 
 if nargout==1
@@ -80,46 +79,54 @@ end
 output_maxlen = zeros(num_output_fields,1);
 for ii = 1:num_output_fields
 	output_maxlen(ii) = max([length(fn{var_ind(ii)}) arrayfun(@(x) length(x.data{ii}),var_info)]);
-	fprintf(['%s' str_margin],addPadding(fn{var_ind(ii)},output_maxlen(ii)));
+	fprintf(['%s' str_margin],addPadding(fn{var_ind(ii)},output_maxlen(ii),TAB_SPACE_LENGTH));
 end
 fprintf('\n');
 
-total_screen_len = sum(arrayfun(@(x) length(tab2space([addPadding('',x) sprintf(str_margin)])),output_maxlen));
+total_screen_len = sum(arrayfun(@(x) length(tab2space([addPadding('',x,TAB_SPACE_LENGTH) sprintf(str_margin)],TAB_SPACE_LENGTH)),output_maxlen));
 disp(repmat('-',1,total_screen_len));
 
 % print output
 for jj = 1:num_vars
 	for ii = 1:num_output_fields
-		fprintf(['%s' str_margin],addPadding(var_info(jj).data{ii},output_maxlen(ii)));
+		fprintf(['%s' str_margin],addPadding(var_info(jj).data{ii},output_maxlen(ii),TAB_SPACE_LENGTH));
 	end
 	fprintf('\n');
 end
 
 disp(repmat('-',1,total_screen_len));
 total_bytes = sum([var_whos(:).bytes]);
-byte_screen_len = sum(arrayfun(@(x) length(tab2space([addPadding('',x) sprintf(str_margin)])),output_maxlen(1:2)));
-fprintf('%s%s\n', addPadding('Total:',byte_screen_len), byte2str(total_bytes));
+byte_screen_len = sum(arrayfun(@(x) length(tab2space([addPadding('',x,TAB_SPACE_LENGTH) sprintf(str_margin)],TAB_SPACE_LENGTH)),output_maxlen(1:2)));
+fprintf('%s%s\n', addPadding('Total:',byte_screen_len,TAB_SPACE_LENGTH), byte2str(total_bytes));
 fprintf('\n');
 
 
 
+end
 
-	function str = addPadding(str,total_length)
-		total_length = TAB_SPACE_LENGTH*ceil(total_length/TAB_SPACE_LENGTH);
-		lenstr = length(tab2space(str));
-		if lenstr<total_length
-			str = [str repmat(sprintf('\t'),1,ceil((total_length-lenstr)/TAB_SPACE_LENGTH))];
-		end
+function str = addPadding(str,total_length,TAB_SPACE_LENGTH)
+	total_length = TAB_SPACE_LENGTH*ceil(total_length/TAB_SPACE_LENGTH);
+	lenstr = length(tab2space(str,TAB_SPACE_LENGTH));
+	if lenstr<total_length
+		str = [str repmat(sprintf('\t'),1,ceil((total_length-lenstr)/TAB_SPACE_LENGTH))];
 	end
-	function str = tab2space(str)
+end
+function str = tab2space(str,TAB_SPACE_LENGTH)
+	tidx = strfind(str,sprintf('\t'));
+	while ~isempty(tidx)
+		numspaces = TAB_SPACE_LENGTH-rem(tidx(1)-1,TAB_SPACE_LENGTH);
+		str = [str(1:tidx(1)-1) repmat(' ',1,numspaces) str(tidx(1)+1:end)];
 		tidx = strfind(str,sprintf('\t'));
-		while ~isempty(tidx)
-			numspaces = TAB_SPACE_LENGTH-rem(tidx(1)-1,TAB_SPACE_LENGTH);
-			str = [str(1:tidx(1)-1) repmat(' ',1,numspaces) str(tidx(1)+1:end)];
-			tidx = strfind(str,sprintf('\t'));
-		end
 	end
+end
 	
+
+function retcmd = orig_whos(options)
+	if nargin==0 || isempty(options)
+		retcmd = ['builtin(''whos'')'];
+	else
+		retcmd = ['builtin(''whos'',''' options ''')'];
+	end
 end
 
 function str = toString(var)
@@ -173,14 +180,18 @@ function retval = isEqualVar(v1,v2)
 end
 
 function retval = isCommandWindowOpen()
-	% there are a few ways of doing this, not exactly sure which is correct	
+	if isOctave()
+		retval = false;
+	else
+		% there are a few ways of doing this, not exactly sure which is correct	
 
-	% retval = desktop('-inuse');
+		% retval = desktop('-inuse');
 
-	jDesktop = com.mathworks.mde.desk.MLDesktop.getInstance;
-	retval = ~isempty(jDesktop.getClient('Command Window'));
+		jDesktop = com.mathworks.mde.desk.MLDesktop.getInstance;
+		retval = ~isempty(jDesktop.getClient('Command Window'));
 
-	% clientTitles = jDesktop.getClientShortTitles
-	% compare if any contains command window
+		% clientTitles = jDesktop.getClientShortTitles
+		% compare if any contains command window
+	end
 end
 
