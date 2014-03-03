@@ -39,7 +39,7 @@ function schemaball(strNames, corrMatrix, fontsize, positive_color_hs, negative_
 	end
 	%% Check input arguments
 	M = numel(strNames);
-	if ~ismatrix(corrMatrix) || size(corrMatrix,1)~=size(corrMatrix,2) || length(corrMatrix)~=M
+	if ndims(corrMatrix)~=2 || size(corrMatrix,1)~=size(corrMatrix,2) || length(corrMatrix)~=M
 		error('SchemaBall:InvalidInputArguments','Invalid size of ''corrMatrix''');
 	end
 	if nargin<3
@@ -60,11 +60,12 @@ function schemaball(strNames, corrMatrix, fontsize, positive_color_hs, negative_
 	R = 1;
 	Nbezier = 100;
 	bezierR = 0.1;
-	markerR = 0.01;
+	markerR = 0.025;
 	labelR = 1.1;
 	
 	%% Create figure with invisible axes, just black background
-	figure('Renderer','zbuffer'); hold on
+	figure;%('Renderer','zbuffer');
+	hold on
 	set(gca,'color','black','XTick',[],'YTick',[]);
 	set(gca,'position',[0 0 1 1],'xlim',2*[-1 1]*R,'ylim',2*[-1 1]*R);
 	axis equal
@@ -89,7 +90,7 @@ function schemaball(strNames, corrMatrix, fontsize, positive_color_hs, negative_
 		else
 			clr = hsv2rgb([negative_color_hs abs(corrMatrix(jj,kk))]);
 		end
-		plot(Bt(:,1),Bt(:,2),'color',clr);
+		plot(Bt(:,1),Bt(:,2),'color',clr);%,'LineSmoothing','on');
 	end
 	
 	%% draw edge markers
@@ -100,7 +101,12 @@ function schemaball(strNames, corrMatrix, fontsize, positive_color_hs, negative_
 	V = mean(abs(corrMatrix),2);
 	V=V./max(V);
 	clr = hsv2rgb([ones(M,1)*[0.585 0.5765] V(:)]);
-	scatter(Px,Py,20,clr);%,'filled'); % non-filled looks better imho
+	
+	%scatter(Px,Py,20,clr);%,'filled'); % non-filled looks better imho
+	for ii=1:M
+		rectangle('Curvature',[1 1],'edgeColor',clr(ii,:),...
+			'Position',[Px(ii)-markerR Py(ii)-markerR 2*markerR*[1 1]]);
+	end
 	
 	%% draw labels
 	[Px,Py] = pol2cart(theta,labelR);
