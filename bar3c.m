@@ -7,6 +7,8 @@ function hh = bar3c( varargin )
 % value. Otherwise, the colors will be relative against the maximum zdata
 % value of all bars on the graph.
 %
+
+% Would like to modify this to have red, yellow and green colors for 0-0.2, 0.2-0.8, and 0.8-1 values respectively, but don't know how- tips?
 	
 	[abscolor, idxabsc]=getarg('MaxColorVal',varargin{:});
 	if idxabsc
